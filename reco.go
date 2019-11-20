@@ -10,11 +10,11 @@ import (
 // RecoService handles communction with recommendation related methods of the
 // Recombee API:/{databaseId}/recomms/users/{userId}/items/
 type RecoService interface {
-	GetPreset(context.Context, User, string) (*RecoRoot, *Response, error)
-	ItemsToUser(context.Context, User, *ListOptions) (*RecoRoot, *Response, error)
-	UsersToUser(context.Context, User, *ListOptions) (*RecoRoot, *Response, error)
-	ItemsToItem(context.Context, Item, *ListOptions) (*RecoRoot, *Response, error)
-	UsersToItem(context.Context, Item, *ListOptions) (*RecoRoot, *Response, error)
+	GetPreset(context.Context, *User, string) (*RecoRoot, *Response, error)
+	ItemsToUser(context.Context, *User, *ListOptions) (*RecoRoot, *Response, error)
+	UsersToUser(context.Context, *User, *ListOptions) (*RecoRoot, *Response, error)
+	ItemsToItem(context.Context, *Item, *ListOptions) (*RecoRoot, *Response, error)
+	UsersToItem(context.Context, *Item, *ListOptions) (*RecoRoot, *Response, error)
 }
 
 // RecoServiceOp handles communction with recommendation related methods of the
@@ -51,13 +51,13 @@ type ListOptions struct {
 var _ RecoService = &RecoServiceOp{}
 
 // GetPreset recommendation by keywords.
-func (s *RecoServiceOp) GetPreset(ctx context.Context, u User, l string) (*RecoRoot, *Response, error) {
+func (s *RecoServiceOp) GetPreset(ctx context.Context, u *User, l string) (*RecoRoot, *Response, error) {
 	iskey := validate(l)
 	if iskey != true {
 		return nil, nil, errors.New("Provide valid recombee logic")
 	}
 	count := 10
-	path := fmt.Sprintf("/%v/recomms/users/%v/items/?count=%v&logic=%v&", "totality-dev", u.ID, count, l)
+	path := fmt.Sprintf("/%v/recomms/users/%v/items/?count=%v&logic=%v&", db, u.ID, count, l)
 	url := GenURL(path)
 
 	req, err := s.client.NewRequest(ctx, http.MethodGet, url, nil)
@@ -76,31 +76,30 @@ func (s *RecoServiceOp) GetPreset(ctx context.Context, u User, l string) (*RecoR
 }
 
 // ItemsToUser recommendations
-func (s *RecoServiceOp) ItemsToUser(ctx context.Context, u User, opt *ListOptions) (*RecoRoot, *Response, error) {
-	path := fmt.Sprintf("/%v/recomms/users/%v/items/?", "totality-dev", u.ID)
+func (s *RecoServiceOp) ItemsToUser(ctx context.Context, u *User, opt *ListOptions) (*RecoRoot, *Response, error) {
+	path := fmt.Sprintf("/%v/recomms/users/%v/items/?", db, u.ID)
 	return reco(ctx, s, path, opt)
 }
 
 // UsersToUser recommendations
-func (s *RecoServiceOp) UsersToUser(ctx context.Context, u User, opt *ListOptions) (*RecoRoot, *Response, error) {
-	path := fmt.Sprintf("/%v/recomms/users/%v/users/?", "totality-dev", u.ID)
+func (s *RecoServiceOp) UsersToUser(ctx context.Context, u *User, opt *ListOptions) (*RecoRoot, *Response, error) {
+	path := fmt.Sprintf("/%v/recomms/users/%v/users/?", db, u.ID)
 	return reco(ctx, s, path, opt)
 }
 
 // ItemsToItem recommendations
-func (s *RecoServiceOp) ItemsToItem(ctx context.Context, i Item, opt *ListOptions) (*RecoRoot, *Response, error) {
-	path := fmt.Sprintf("/%v/recomms/items/%v/items/?", "totality-dev", i.ID)
+func (s *RecoServiceOp) ItemsToItem(ctx context.Context, i *Item, opt *ListOptions) (*RecoRoot, *Response, error) {
+	path := fmt.Sprintf("/%v/recomms/items/%v/items/?", db, i.ID)
 	return reco(ctx, s, path, opt)
 }
 
 // UsersToItem recommendations
-func (s *RecoServiceOp) UsersToItem(ctx context.Context, i Item, opt *ListOptions) (*RecoRoot, *Response, error) {
-	path := fmt.Sprintf("/%v/recomms/items/%v/users/?", "totality-dev", i.ID)
+func (s *RecoServiceOp) UsersToItem(ctx context.Context, i *Item, opt *ListOptions) (*RecoRoot, *Response, error) {
+	path := fmt.Sprintf("/%v/recomms/items/%v/users/?", db, i.ID)
 	return reco(ctx, s, path, opt)
 }
 
 func reco(ctx context.Context, s *RecoServiceOp, path string, opt *ListOptions) (*RecoRoot, *Response, error) {
-	opt.Count = 10
 	url := GenURL(path)
 
 	req, err := s.client.NewRequest(ctx, http.MethodPost, url, opt)
@@ -109,8 +108,8 @@ func reco(ctx context.Context, s *RecoServiceOp, path string, opt *ListOptions) 
 	}
 
 	root := new(RecoRoot)
-
 	resp, err := s.client.Do(ctx, req, root)
+
 	if err != nil {
 		return nil, resp, err
 	}
@@ -119,7 +118,7 @@ func reco(ctx context.Context, s *RecoServiceOp, path string, opt *ListOptions) 
 }
 
 // func (s *RecoServiceOp) ItemToUser(ctx context.Context, u User, opt *ListOptions) (*RecoRoot, *Response, error) {
-// 	path := fmt.Sprintf("/%v/recomms/users/%v/items/?", "totality-dev", u.ID)
+// 	path := fmt.Sprintf("/%v/recomms/users/%v/items/?", db, u.ID)
 // 	opt.Count = 10
 // 	url := GenURL(path)
 

@@ -27,7 +27,7 @@ type UsersRoot []string
 
 //Post items to recombee
 func (s *UserServiceOp) Post(ctx context.Context, u User) (*Response, error) {
-	path := fmt.Sprintf("/%v/users/%v?", "totality-dev", u.ID)
+	path := fmt.Sprintf("/%v/users/%v?", db, u.ID)
 
 	url := GenURL(path)
 	req, err := s.client.NewRequest(ctx, http.MethodPut, url, nil)
@@ -44,7 +44,7 @@ func (s *UserServiceOp) Post(ctx context.Context, u User) (*Response, error) {
 }
 
 func (s *UserServiceOp) Delete(ctx context.Context, u User) (*Response, error) {
-	path := "/totality-dev/users/" + u.ID
+	path := fmt.Sprintf("/%v/users/%v", db, u.ID)
 	url := GenURL(path)
 	req, err := s.client.NewRequest(ctx, http.MethodDelete, url, nil)
 	if err != nil {
@@ -61,7 +61,7 @@ func (s *UserServiceOp) Delete(ctx context.Context, u User) (*Response, error) {
 
 func (s *UserServiceOp) List(ctx context.Context) (*UsersRoot, *Response, error) {
 	//TODO filter options in url
-	path := "/totality-dev/users/list/"
+	path := fmt.Sprintf("/%v/users/list/", db)
 	url := GenURL(path)
 	req, err := s.client.NewRequest(ctx, http.MethodGet, url, nil)
 	if err != nil {
@@ -77,7 +77,7 @@ func (s *UserServiceOp) List(ctx context.Context) (*UsersRoot, *Response, error)
 }
 
 func (s *UserServiceOp) Set(ctx context.Context, u User, m interface{}) (*Response, error) {
-	path := "/totality-dev/users/" + u.ID
+	path := fmt.Sprintf("/%v/users/%v", db, u.ID)
 	url := GenURL(path)
 
 	req, err := s.client.NewRequest(ctx, http.MethodPost, url, m)

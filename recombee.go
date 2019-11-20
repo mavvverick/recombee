@@ -12,7 +12,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"time"
 )
@@ -24,7 +23,10 @@ const (
 	mediaType      = "application/json"
 )
 
-var secret = os.Getenv("RECOMBEE_SECRET")
+var db = ""
+var secret = ""
+
+//os.Getenv("RECOMBEE_SECRET")
 
 var logics = map[string]string{
 	"recombee:default":               "recombee:default",
@@ -49,10 +51,14 @@ type Client struct {
 	BaseURL *url.URL
 
 	UserAgent string
+	DB        string
+	Secret    string
 	//Rate Rate
-	Item ItemService
-	Reco RecoService
-	User UserService
+	Item  ItemService
+	Reco  RecoService
+	User  UserService
+	Admin AdminService
+	Batch BatchService
 	// Optional function called after every successful request made to the DO APIs
 	onRequestCompleted RequestCompletionCallback
 }
@@ -75,17 +81,15 @@ type ErrorResponse struct {
 	Response *http.Response
 
 	// Error message
-	Message string `json:"message"`
-
-	// RequestID returned from the API, useful to contact support.
-	RequestID string `json:"request_id"`
+	StatusCode string `json:"statusCode"`
+	Message    string `json:"message"`
 }
 
 // RequestCompletionCallback defines the type of the request callback function
 type RequestCompletionCallback func(*http.Request, *http.Response)
 
 // NewClient returns a new Recombee API client.
-func NewClient(httpClient *http.Client) *Client {
+func NewClient(httpClient *http.Client, dbKey string, secretKey string) *Client {
 	if httpClient == nil {
 		//httpClient = http.DefaultClient
 		httpClient = &http.Client{
@@ -94,11 +98,14 @@ func NewClient(httpClient *http.Client) *Client {
 	}
 
 	baseURL, _ := url.Parse(defaultBaseURL)
-
-	c := &Client{client: httpClient, BaseURL: baseURL, UserAgent: userAgent}
+	db = dbKey
+	secret = secretKey
+	c := &Client{client: httpClient, BaseURL: baseURL, UserAgent: userAgent, DB: db, Secret: secret}
 	c.Item = &ItemServiceOp{client: c}
 	c.Reco = &RecoServiceOp{client: c}
 	c.User = &UserServiceOp{client: c}
+	c.Admin = &AdminServiceOp{client: c}
+	c.Batch = &BatchServiceOp{client: c}
 	return c
 }
 
@@ -192,9 +199,9 @@ func newResponse(r *http.Response) *Response {
 }
 
 func (r *ErrorResponse) Error() string {
-	if r.RequestID != "" {
+	if r.StatusCode != "" {
 		return fmt.Sprintf("%v %v: %d (request %q) %v",
-			r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, r.RequestID, r.Message)
+			r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, r.StatusCode, r.Message)
 	}
 	return fmt.Sprintf("%v %v: %d %v",
 		r.Response.Request.Method, r.Response.Request.URL, r.Response.StatusCode, r.Message)

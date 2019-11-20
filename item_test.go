@@ -1,5 +1,11 @@
 package recombee
 
+import (
+	"fmt"
+	"net/http"
+	"testing"
+)
+
 // import (
 // 	"fmt"
 // 	"net/http"
@@ -23,18 +29,29 @@ package recombee
 // 	fmt.Println(resp)
 // }
 
-// func TestAction_List(t *testing.T) {
-// 	setup()
-// 	defer teardown()
-// 	mux.HandleFunc("/v1/items/1", func(w http.ResponseWriter, r *http.Request) {
-// 		testMethod(t, r, http.MethodPost)
-// 	})
+func TestAction_AddProp(t *testing.T) {
+	setup()
+	defer teardown()
+	mux.HandleFunc("/v1/items/1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPost)
+	})
 
-// 	items, _, err := client.Item.List(ctx)
+	/*
+		itemId, userId, tags, desc, script, topic, cat, imgs
+	*/
 
-// 	if err != nil {
-// 		t.Fatalf("unexpected error: %s", err)
-// 	}
+	// prop := ItemProperty{
+	// 	Name: "img",
+	// 	Type: "image",
+	// }
+	// items, err := client.Item.AddProp(ctx, prop)
+	//items, err := client.Item.DeleteProp(ctx, prop)
 
-// 	fmt.Println(*items)
-// }
+	items, _, err := client.Item.ListProp(ctx)
+
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+
+	fmt.Println(*items)
+}
