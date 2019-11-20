@@ -4,13 +4,13 @@ Recombee is a Go client library for accessing the Recombee V2 API.
 
 ## Install
 ```sh
-go get github.com/mavvverick/go-recombee
+go get github.com/mavvverick/recombee
 ```
 
 ## Usage
 
 ```go
-import "github.com/mavvverick/go-recombee"
+import "github.com/mavvverick/recombee"
 ```
 
 
@@ -22,7 +22,7 @@ To get recomended item to a specific user:
 package main
 import (
 	"context"
-	"github.com/mavvverick/go-recombee"
+	"github.com/mavvverick/recombee"
 )
 
 
