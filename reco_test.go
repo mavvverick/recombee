@@ -13,7 +13,7 @@ func TestAction_Get(t *testing.T) {
 		testMethod(t, r, http.MethodPost)
 	})
 
-	u := User{ID: "1"}
+	u := &User{ID: "1"}
 	l := logics["recombee:default"]
 
 	recoms, _, err := client.Reco.GetPreset(ctx, u, l)
@@ -31,7 +31,7 @@ func TestAction_ItemToUser(t *testing.T) {
 		testMethod(t, r, http.MethodPost)
 	})
 
-	u := User{ID: "1"}
+	u := &User{ID: "1"}
 	opts := &ListOptions{
 		Count:        10,
 		RotationRate: 1,

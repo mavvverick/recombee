@@ -5,7 +5,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"testing"
+
+	_ "github.com/joho/godotenv/autoload"
 )
 
 var (
@@ -22,7 +25,7 @@ func setup() {
 	mux = http.NewServeMux()
 	server = httptest.NewServer(mux)
 
-	client = NewClient(nil)
+	client = NewClient(nil, os.Getenv("RECO_DB"), os.Getenv("RECO_KEY"))
 	url, _ := url.Parse("http://rapi.recombee.com/")
 	client.BaseURL = url
 }

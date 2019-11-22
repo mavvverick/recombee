@@ -15,7 +15,7 @@ type ItemService interface {
 	DeleteProp(context.Context, *ItemProperty) (*Response, error)
 	ListProp(context.Context) (*ItemsPropRoot, *Response, error)
 
-	SetProp(context.Context, *Item, interface{}) (*Response, error)
+	SetProp(context.Context, *Item, interface{}) (string, *Response, error)
 	GetProp(context.Context, *Item) (*Response, error)
 }
 
@@ -148,21 +148,23 @@ func (s *ItemServiceOp) ListProp(ctx context.Context) (*ItemsPropRoot, *Response
 }
 
 //SetProp of recombee items
-func (s *ItemServiceOp) SetProp(ctx context.Context, i *Item, m interface{}) (*Response, error) {
+func (s *ItemServiceOp) SetProp(ctx context.Context, i *Item, m interface{}) (string, *Response, error) {
 	path := fmt.Sprintf("/%v/items/%v?", db, i.ID)
 	url := GenURL(path)
 
+	var root string
+
 	req, err := s.client.NewRequest(ctx, http.MethodPost, url, m)
 	if err != nil {
-		return nil, err
+		return "", nil, err
 	}
 
-	resp, err := s.client.Do(ctx, req, nil)
+	resp, err := s.client.Do(ctx, req, root)
 	if err != nil {
-		return resp, err
+		return "", resp, err
 	}
 
-	return resp, err
+	return root, resp, err
 }
 
 //GetProp of recombee items
