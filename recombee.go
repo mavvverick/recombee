@@ -174,12 +174,6 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*Res
 		return response, err
 	}
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	bodyString := string(bodyBytes)
-	fmt.Println(bodyString)
 	if v != nil {
 		if w, ok := v.(io.Writer); ok {
 			_, err = io.Copy(w, resp.Body)

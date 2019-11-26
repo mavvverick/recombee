@@ -10,7 +10,7 @@ import (
 // RecoService handles communction with recommendation related methods of the
 // Recombee API:/{databaseId}/recomms/users/{userId}/items/
 type RecoService interface {
-	GetPreset(context.Context, *User, string) (*RecoRoot, *Response, error)
+	GetPreset(context.Context, *User, string, *ListOptions) (*RecoRoot, *Response, error)
 	ItemsToUser(context.Context, *User, *ListOptions) (*RecoRoot, *Response, error)
 	UsersToUser(context.Context, *User, *ListOptions) (*RecoRoot, *Response, error)
 	ItemsToItem(context.Context, *Item, *ListOptions) (*RecoRoot, *Response, error)
@@ -51,7 +51,7 @@ type ListOptions struct {
 var _ RecoService = &RecoServiceOp{}
 
 // GetPreset recommendation by keywords.
-func (s *RecoServiceOp) GetPreset(ctx context.Context, u *User, l string) (*RecoRoot, *Response, error) {
+func (s *RecoServiceOp) GetPreset(ctx context.Context, u *User, l string, opt *ListOptions) (*RecoRoot, *Response, error) {
 	iskey := validate(l)
 	if iskey != true {
 		return nil, nil, errors.New("Provide valid recombee logic")
@@ -60,7 +60,7 @@ func (s *RecoServiceOp) GetPreset(ctx context.Context, u *User, l string) (*Reco
 	path := fmt.Sprintf("/%v/recomms/users/%v/items/?count=%v&logic=%v&", db, u.ID, count, l)
 	url := GenURL(path)
 
-	req, err := s.client.NewRequest(ctx, http.MethodGet, url, nil)
+	req, err := s.client.NewRequest(ctx, http.MethodPost, url, opt)
 	if err != nil {
 		return nil, nil, err
 	}

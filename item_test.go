@@ -97,5 +97,5 @@ func TestAction_SETProp(t *testing.T) {
 		t.Fatalf("unexpected error: %s", err)
 	}
 
-	fmt.Println(resp)
+	fmt.Println(*resp)
 }

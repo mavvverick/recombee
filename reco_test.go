@@ -15,8 +15,12 @@ func TestAction_Get(t *testing.T) {
 
 	u := &User{ID: "1"}
 	l := logics["recombee:default"]
+	opts := &ListOptions{
+		Count:        10,
+		RotationRate: 1,
+	}
 
-	recoms, _, err := client.Reco.GetPreset(ctx, u, l)
+	recoms, _, err := client.Reco.GetPreset(ctx, u, l, opts)
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
