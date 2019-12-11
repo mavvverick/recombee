@@ -26,7 +26,7 @@ func setup() {
 	server = httptest.NewServer(mux)
 
 	client = NewClient(nil, os.Getenv("RECO_DB"), os.Getenv("RECO_KEY"))
-	url, _ := url.Parse("http://rapi.recombee.com/")
+	url, _ := url.Parse("https://rapi.recombee.com/")
 	client.BaseURL = url
 }
 

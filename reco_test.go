@@ -21,6 +21,7 @@ func TestAction_Get(t *testing.T) {
 	}
 
 	recoms, _, err := client.Reco.GetPreset(ctx, u, l, opts)
+
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}

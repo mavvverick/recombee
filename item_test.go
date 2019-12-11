@@ -38,24 +38,26 @@ func TestAction_AddProp(t *testing.T) {
 		testMethod(t, r, http.MethodPost)
 	})
 
-	/*
-		itemId, userId, tags, desc, script, topic, cat, imgs
-	*/
-
-	// prop := ItemProperty{
-	// 	Name: "img",
-	// 	Type: "image",
-	// }
-	// items, err := client.Item.AddProp(ctx, prop)
-	//items, err := client.Item.DeleteProp(ctx, prop)
-
-	items, _, err := client.Item.ListProp(ctx)
-
-	if err != nil {
-		t.Fatalf("unexpected error: %s", err)
+	properties := []ItemProperty{
+		ItemProperty{Name: "tags", Type: "set"},
+		ItemProperty{Name: "cat", Type: "set"},
+		ItemProperty{Name: "desc", Type: "string"},
+		ItemProperty{Name: "msg", Type: "string"},
+		ItemProperty{Name: "user", Type: "string"},
+		ItemProperty{Name: "img", Type: "image"},
 	}
 
-	fmt.Println(*items)
+	for _, prop := range properties {
+		items, err := client.Item.AddProp(ctx, &prop)
+		if err != nil {
+			t.Fatalf("unexpected error: %s", err)
+		}
+		fmt.Println(*items)
+	}
+
+	//items, err := client.Item.DeleteProp(ctx, prop)
+	//items, _, err := client.Item.ListProp(ctx)
+
 }
 
 type itemData struct {
@@ -78,7 +80,6 @@ func TestAction_SETProp(t *testing.T) {
 	/*
 		itemId, userId, tags, desc, script, topic, cat, imgs
 	*/
-
 	itemData := itemData{
 		User:          "123",
 		Desc:          "yahoo!",
