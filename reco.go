@@ -44,8 +44,8 @@ type ListOptions struct {
 	IncludedProperties []interface{} `json:"includedProperties,omitempty"`
 	Diversity          int64         `json:"diversity,omitempty"`
 	MinRelevance       string        `json:"minRelevance,omitempty"`
-	RotationRate       float32       `json:"rotationRate,omitempty"`
-	RotationTime       float32       `json:"rotationTime,omitempty"`
+	RotationRate       float32       `json:"rotationRate"`
+	RotationTime       float32       `json:"rotationTime"`
 }
 
 var _ RecoService = &RecoServiceOp{}
@@ -66,7 +66,6 @@ func (s *RecoServiceOp) GetPreset(ctx context.Context, u *User, l string, opt *L
 	}
 
 	root := new(RecoRoot)
-
 	resp, err := s.client.Do(ctx, req, root)
 	if err != nil {
 		return nil, resp, err
