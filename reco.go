@@ -10,7 +10,7 @@ import (
 // RecoService handles communction with recommendation related methods of the
 // Recombee API:/{databaseId}/recomms/users/{userId}/items/
 type RecoService interface {
-	GetPreset(context.Context, *User, string, *ListOptions) (*RecoRoot, *Response, error)
+	GetPreset(context.Context, *User, *ListOptions) (*RecoRoot, *Response, error)
 	ItemsToUser(context.Context, *User, *ListOptions) (*RecoRoot, *Response, error)
 	UsersToUser(context.Context, *User, *ListOptions) (*RecoRoot, *Response, error)
 	ItemsToItem(context.Context, *Item, *ListOptions) (*RecoRoot, *Response, error)
@@ -32,32 +32,45 @@ type RecoRoot struct {
 	Recomms  []Recomm `json:"recomms"`
 }
 
+type Settings struct {
+	MaxAge int64 `json:"maxAge"`
+}
+
+type Logic struct {
+	Name     string    `json:"name"`
+	Settings *Settings `json:"settings"`
+}
+
 // ListOptions for recommendations
 type ListOptions struct {
-	Count              int32         `json:"count"`
+	Count              int64         `json:"count"`
 	Filter             string        `json:"filter,omitempty"`
 	Booster            string        `json:"booster,omitempty"`
 	CascadeCreate      bool          `json:"cascadeCreate,omitempty"`
 	Scenario           string        `json:"scenario,omitempty"`
-	Logic              interface{}   `json:"logic,omitempty"`
+	Logic              *Logic        `json:"logic,omitempty"`
 	ReturnProperties   bool          `json:"returnProperties,omitempty"`
 	IncludedProperties []interface{} `json:"includedProperties,omitempty"`
-	Diversity          int64         `json:"diversity,omitempty"`
+	Diversity          float32       `json:"diversity,omitempty"`
 	MinRelevance       string        `json:"minRelevance,omitempty"`
 	RotationRate       float32       `json:"rotationRate"`
-	RotationTime       float32       `json:"rotationTime"`
+	RotationTime       float64       `json:"rotationTime"`
 }
 
 var _ RecoService = &RecoServiceOp{}
 
 // GetPreset recommendation by keywords.
-func (s *RecoServiceOp) GetPreset(ctx context.Context, u *User, l string, opt *ListOptions) (*RecoRoot, *Response, error) {
-	iskey := validate(l)
+func (s *RecoServiceOp) GetPreset(ctx context.Context, u *User, opt *ListOptions) (*RecoRoot, *Response, error) {
+	iskey := validate(opt.Logic.Name)
 	if iskey != true {
 		return nil, nil, errors.New("Provide valid recombee logic")
 	}
-	count := 10
-	path := fmt.Sprintf("/%v/recomms/users/%v/items/?count=%v&logic=%v&", db, u.ID, count, l)
+
+	if opt.Count == 0 {
+		opt.Count = 10
+	}
+
+	path := fmt.Sprintf("/%v/recomms/users/%v/items/", db, u.ID)
 	url := GenURL(path)
 
 	req, err := s.client.NewRequest(ctx, http.MethodPost, url, opt)
@@ -77,24 +90,36 @@ func (s *RecoServiceOp) GetPreset(ctx context.Context, u *User, l string, opt *L
 // ItemsToUser recommendations
 func (s *RecoServiceOp) ItemsToUser(ctx context.Context, u *User, opt *ListOptions) (*RecoRoot, *Response, error) {
 	path := fmt.Sprintf("/%v/recomms/users/%v/items/?", db, u.ID)
+	if opt.Count == 0 {
+		opt.Count = 10
+	}
 	return reco(ctx, s, path, opt)
 }
 
 // UsersToUser recommendations
 func (s *RecoServiceOp) UsersToUser(ctx context.Context, u *User, opt *ListOptions) (*RecoRoot, *Response, error) {
 	path := fmt.Sprintf("/%v/recomms/users/%v/users/?", db, u.ID)
+	if opt.Count == 0 {
+		opt.Count = 10
+	}
 	return reco(ctx, s, path, opt)
 }
 
 // ItemsToItem recommendations
 func (s *RecoServiceOp) ItemsToItem(ctx context.Context, i *Item, opt *ListOptions) (*RecoRoot, *Response, error) {
 	path := fmt.Sprintf("/%v/recomms/items/%v/items/?", db, i.ID)
+	if opt.Count == 0 {
+		opt.Count = 10
+	}
 	return reco(ctx, s, path, opt)
 }
 
 // UsersToItem recommendations
 func (s *RecoServiceOp) UsersToItem(ctx context.Context, i *Item, opt *ListOptions) (*RecoRoot, *Response, error) {
 	path := fmt.Sprintf("/%v/recomms/items/%v/users/?", db, i.ID)
+	if opt.Count == 0 {
+		opt.Count = 10
+	}
 	return reco(ctx, s, path, opt)
 }
 

@@ -62,12 +62,13 @@ func TestAction_AddProp(t *testing.T) {
 	})
 
 	properties := []ItemProperty{
-		ItemProperty{Name: "tags", Type: "set"},
-		ItemProperty{Name: "cat", Type: "set"},
-		ItemProperty{Name: "desc", Type: "string"},
-		ItemProperty{Name: "msg", Type: "string"},
-		ItemProperty{Name: "user", Type: "string"},
-		ItemProperty{Name: "img", Type: "image"},
+		// ItemProperty{Name: "tags", Type: "set"},
+		// ItemProperty{Name: "cat", Type: "set"},
+		// ItemProperty{Name: "desc", Type: "string"},
+		// ItemProperty{Name: "msg", Type: "string"},
+		// ItemProperty{Name: "user", Type: "string"},
+		// ItemProperty{Name: "img", Type: "image"},
+		ItemProperty{Name: "when", Type: "timestamp"},
 	}
 
 	for _, prop := range properties {

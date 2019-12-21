@@ -2,6 +2,7 @@ package recombee
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -28,6 +29,7 @@ func setup() {
 	client = NewClient(nil, os.Getenv("RECO_DB"), os.Getenv("RECO_KEY"))
 	url, _ := url.Parse("https://rapi.recombee.com/")
 	client.BaseURL = url
+	fmt.Println(os.Getenv("RECO_DB"))
 }
 
 func teardown() {

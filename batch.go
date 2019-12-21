@@ -21,7 +21,7 @@ type BatchServiceOp struct {
 var _ BatchService = &BatchServiceOp{}
 
 type Batches struct {
-	Requests []Request `json:"requests"`
+	Requests *[]Request `json:"requests"`
 }
 
 //Request structure for batch

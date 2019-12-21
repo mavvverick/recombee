@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestAction_Post(t *testing.T) {
+func TestAction_User(t *testing.T) {
 	setup()
 	defer teardown()
 	mux.HandleFunc("/v1/reco/1", func(w http.ResponseWriter, r *http.Request) {
