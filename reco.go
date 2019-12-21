@@ -70,7 +70,7 @@ func (s *RecoServiceOp) GetPreset(ctx context.Context, u *User, opt *ListOptions
 		opt.Count = 10
 	}
 
-	path := fmt.Sprintf("/%v/recomms/users/%v/items/", db, u.ID)
+	path := fmt.Sprintf("/%v/recomms/users/%v/items/?", db, u.ID)
 	url := GenURL(path)
 
 	req, err := s.client.NewRequest(ctx, http.MethodPost, url, opt)
