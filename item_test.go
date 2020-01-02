@@ -2,17 +2,23 @@ package recombee
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strings"
 	"testing"
-	//"github.com/mavvverick/recombee"
+	"time"
 )
 
-// import (
-// 	"fmt"
-// 	"net/http"
-// 	"testing"
-// )
+type itemData struct {
+	User          string   `json:"user"`
+	Script        string   `json:"script,omitempty"`
+	Cat           []string `json:"cat,omitempty"`
+	Desc          string   `json:"desc,omitempty"`
+	When          int64    `json:"when,omitempty"`
+	Tags          []string `json:"tags,omitempty"`
+	Img           string   `json:"img,omitempty"`
+	CascadeCreate bool     `json:"!cascadeCreate,omitempty"`
+}
 
 func TestAction_Post(t *testing.T) {
 	setup()
@@ -29,6 +35,45 @@ func TestAction_Post(t *testing.T) {
 	}
 
 	fmt.Println(resp)
+}
+
+func TestAction_ListAndUpdateItems(t *testing.T) {
+	setup()
+	defer teardown()
+	mux.HandleFunc("/v1/reco/1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPost)
+	})
+
+	itemIDS, _, err := client.Item.List(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	tMinus60 := time.Now().Add(-24 * 21 * time.Hour)
+
+	for _, itemID := range *itemIDS {
+		count := rand.Intn(21)
+		time := tMinus60.Add(24 * time.Duration(count) * time.Hour)
+		fmt.Println(count, time)
+		fmt.Println("Updating... ", itemID)
+
+		item := &Item{
+			ID: itemID,
+		}
+
+		itemData := &itemData{
+			When: time.Unix(),
+		}
+
+		ok, _, err := client.Item.SetProp(ctx, item, *itemData)
+		if err != nil {
+			t.Fatalf("unexpected error: %s", err)
+		}
+
+		fmt.Println(*ok)
+	}
+
 }
 
 func TestAction_Delete(t *testing.T) {
@@ -82,16 +127,6 @@ func TestAction_AddProp(t *testing.T) {
 	//items, err := client.Item.DeleteProp(ctx, prop)
 	//items, _, err := client.Item.ListProp(ctx)
 
-}
-
-type itemData struct {
-	User          string   `json:"user"`
-	Script        string   `json:"script,omitempty"`
-	Cat           []string `json:"cat,omitempty"`
-	Desc          string   `json:"desc,omitempty"`
-	Tags          []string `json:"tags,omitempty"`
-	Img           string   `json:"img,omitempty"`
-	CascadeCreate bool     `json:"!cascadeCreate,omitempty"`
 }
 
 func TestAction_SETProp(t *testing.T) {

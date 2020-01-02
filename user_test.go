@@ -13,7 +13,7 @@ func TestAction_User(t *testing.T) {
 		testMethod(t, r, http.MethodPost)
 	})
 
-	u := User{ID: "1"}
+	u := &User{ID: "1"}
 
 	resp, err := client.User.Post(ctx, u)
 	if err != nil {
@@ -21,4 +21,24 @@ func TestAction_User(t *testing.T) {
 	}
 
 	fmt.Println(resp)
+}
+
+func TestAction_ListAndDeleteUsers(t *testing.T) {
+	setup()
+	defer teardown()
+	mux.HandleFunc("/v1/reco/1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPost)
+	})
+
+	users, _, err := client.User.List(ctx)
+	if err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	}
+
+	for _, user := range *users {
+		fmt.Println("Deleting... ", user)
+		u := &User{ID: user}
+		_, err = client.User.Delete(ctx, u)
+	}
+
 }
