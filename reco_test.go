@@ -16,26 +16,75 @@ func TestAction_Get(t *testing.T) {
 		testMethod(t, r, http.MethodPost)
 	})
 
-	u := &User{ID: "1"}
+	u := &User{ID: "2"}
 	opts := &ListOptions{
-		Count:        10,
-		RotationRate: 1,
-		RotationTime: 300,
+		Count: 3,
+		//Booster: fmt.Sprintf("if 'when' >= %v then 5 else if ('when' < %v and 'when' >=  %v) then 2 else 0", day(2), day(4), day(6)),
+		//Booster: fmt.Sprintf("if 'when' >= %v then 100000 else 1", day(10)),
+		//Filter:  " 'when' >= now() - (25 * 24 * 60 * 60)",
+		//Booster: "if 'when' >= now() - (5 * 24 * 60 * 60) then 10.00 else 1",
+		//Booster:            fmt.Sprintf(`if 'tags' in {"expectations"} then 10000000 else 1`),
+		RotationRate:     1,
+		ReturnProperties: true,
+		//IncludedProperties: "when,user",
+		IncludedProperties: "tags,username,rating,tracks,user",
+		RotationTime:       30000,
+		CascadeCreate:      true,
 	}
 
-	opts.Booster = getRecencyBooster()
-	opts.Diversity = 1.0
-	opts.Logic = &Logic{
-		Name: "recombee:popular",
-	}
+	//opts.Booster = getRecencyBooster()
+	//opts.Diversity = 1.0
+	// opts.Logic = &Logic{
+	// 	Name: "recombee:popular",
+	// }
 
-	recoms, _, err := client.Reco.GetPreset(ctx, u, opts)
+	fmt.Println(opts)
+	//recoms, _, err := client.Reco.GetPreset(ctx, u, opts)
+	recoms, _, err := client.Reco.ItemsToUser(ctx, u, opts)
 
 	if err != nil {
 		t.Fatalf("unexpected error: %s", err)
 	}
 
-	fmt.Println(recoms)
+	for _, data := range recoms.Recomms {
+		Data := data.Values.(map[string]interface{})
+		//fmt.Println(data.ID, Data["user"], time.Unix(int64(Data["when"].(float64)), 0))
+		fmt.Println(data.ID, Data["user"])
+	}
+}
+
+func TestAction_GetAsync(t *testing.T) {
+	setup()
+	defer teardown()
+	mux.HandleFunc("/v1/reco/1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPost)
+	})
+
+	u := &User{ID: "2"}
+	opts := &ListOptions{
+		Count:              1,
+		RotationRate:       1,
+		ReturnProperties:   true,
+		IncludedProperties: "tags, username,rating,tracks,user",
+		RotationTime:       30000,
+		CascadeCreate:      true,
+	}
+
+	c := make(chan *RecoRoot, 2)
+
+	go client.Reco.ItemsToUserAsync(ctx, u, opts, c)
+	go client.Reco.ItemsToUserAsync(ctx, u, opts, c)
+
+	a := []*RecoRoot{<-c, <-c}
+	for _, list := range a {
+		fmt.Println(list)
+		for _, data := range list.Recomms {
+			Data := data.Values.(map[string]interface{})
+			fmt.Println(data.ID, Data["user"])
+		}
+	}
+
+	defer close(c)
 }
 
 func getRecencyBooster() string {

@@ -12,6 +12,7 @@ import (
 type RecoService interface {
 	GetPreset(context.Context, *User, *ListOptions) (*RecoRoot, *Response, error)
 	ItemsToUser(context.Context, *User, *ListOptions) (*RecoRoot, *Response, error)
+	ItemsToUserAsync(context.Context, *User, *ListOptions, chan *RecoRoot)
 	UsersToUser(context.Context, *User, *ListOptions) (*RecoRoot, *Response, error)
 	ItemsToItem(context.Context, *Item, *ListOptions) (*RecoRoot, *Response, error)
 	UsersToItem(context.Context, *Item, *ListOptions) (*RecoRoot, *Response, error)
@@ -24,7 +25,8 @@ type RecoServiceOp struct {
 }
 
 type Recomm struct {
-	ID string `json:"id"`
+	ID     string      `json:"id"`
+	Values interface{} `json:"values"`
 }
 
 type RecoRoot struct {
@@ -43,18 +45,18 @@ type Logic struct {
 
 // ListOptions for recommendations
 type ListOptions struct {
-	Count              int64         `json:"count"`
-	Filter             string        `json:"filter,omitempty"`
-	Booster            string        `json:"booster,omitempty"`
-	CascadeCreate      bool          `json:"cascadeCreate,omitempty"`
-	Scenario           string        `json:"scenario,omitempty"`
-	Logic              *Logic        `json:"logic,omitempty"`
-	ReturnProperties   bool          `json:"returnProperties,omitempty"`
-	IncludedProperties []interface{} `json:"includedProperties,omitempty"`
-	Diversity          float32       `json:"diversity,omitempty"`
-	MinRelevance       string        `json:"minRelevance,omitempty"`
-	RotationRate       float32       `json:"rotationRate"`
-	RotationTime       float64       `json:"rotationTime"`
+	Count              int64   `json:"count"`
+	Filter             string  `json:"filter,omitempty"`
+	Booster            string  `json:"booster,omitempty"`
+	CascadeCreate      bool    `json:"cascadeCreate,omitempty"`
+	Scenario           string  `json:"scenario,omitempty"`
+	Logic              *Logic  `json:"logic,omitempty"`
+	ReturnProperties   bool    `json:"returnProperties,omitempty"`
+	IncludedProperties string  `json:"includedProperties,omitempty"`
+	Diversity          float32 `json:"diversity,omitempty"`
+	MinRelevance       string  `json:"minRelevance,omitempty"`
+	RotationRate       float32 `json:"rotationRate"`
+	RotationTime       float64 `json:"rotationTime"`
 }
 
 var _ RecoService = &RecoServiceOp{}
@@ -85,6 +87,22 @@ func (s *RecoServiceOp) GetPreset(ctx context.Context, u *User, opt *ListOptions
 	}
 
 	return root, resp, nil
+}
+
+// ItemsToUserAsync async recommendations
+func (s *RecoServiceOp) ItemsToUserAsync(ctx context.Context, u *User, opt *ListOptions, c chan *RecoRoot) {
+	path := fmt.Sprintf("/%v/recomms/users/%v/items/?", db, u.ID)
+	if opt.Count == 0 {
+		opt.Count = 10
+	}
+
+	list, _, err := reco(ctx, s, path, opt)
+	if err != nil {
+		c <- &RecoRoot{}
+		return
+	}
+
+	c <- list
 }
 
 // ItemsToUser recommendations

@@ -107,12 +107,17 @@ func TestAction_AddProp(t *testing.T) {
 	})
 
 	properties := []ItemProperty{
-		// ItemProperty{Name: "tags", Type: "set"},
-		// ItemProperty{Name: "cat", Type: "set"},
-		// ItemProperty{Name: "desc", Type: "string"},
-		// ItemProperty{Name: "msg", Type: "string"},
 		// ItemProperty{Name: "user", Type: "string"},
-		// ItemProperty{Name: "img", Type: "image"},
+		// ItemProperty{Name: "when", Type: "timestamp"},
+		ItemProperty{Name: "tags", Type: "set"},
+		ItemProperty{Name: "cat", Type: "set"},
+		ItemProperty{Name: "desc", Type: "string"},
+		ItemProperty{Name: "msg", Type: "string"},
+		ItemProperty{Name: "user", Type: "string"},
+		ItemProperty{Name: "username", Type: "string"},
+		ItemProperty{Name: "img", Type: "image"},
+		ItemProperty{Name: "tracks", Type: "string"},
+		ItemProperty{Name: "rating", Type: "string"},
 		ItemProperty{Name: "when", Type: "timestamp"},
 	}
 
@@ -158,4 +163,38 @@ func TestAction_SETProp(t *testing.T) {
 	}
 
 	fmt.Println(*resp)
+}
+
+func TestAction_LoadDummyProp(t *testing.T) {
+	setup()
+	defer teardown()
+	mux.HandleFunc("/v1/items/1", func(w http.ResponseWriter, r *http.Request) {
+		testMethod(t, r, http.MethodPost)
+	})
+
+	/*
+		itemId, userId, tags, desc, script, topic, cat, imgs
+	*/
+
+	for i := 1; i < 250; i++ {
+		rand.Seed(time.Now().UTC().UnixNano())
+		day := rand.Intn(30) + 1
+		fmt.Println(day)
+		itemData := itemData{
+			User:          "123",
+			When:          time.Now().Add(time.Duration(day) * -24 * time.Hour).Unix(),
+			CascadeCreate: true,
+		}
+		item := &Item{
+			ID: fmt.Sprintf("item-%v", rand.Int63n(3000)),
+		}
+
+		resp, _, err := client.Item.SetProp(ctx, item, itemData)
+		if err != nil {
+			t.Fatalf("unexpected error: %s", err)
+		}
+
+		fmt.Println(*resp)
+	}
+
 }
